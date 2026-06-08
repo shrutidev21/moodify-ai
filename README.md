@@ -29,8 +29,55 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Auth, Session, and API routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This app uses Supabase Auth for sign-up, sign-in, and session management.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Client-side auth is handled in `src/features/auth/authService.ts`
+- `src/app/api/auth/create-profile/route.ts` creates a Supabase profile record after sign-up
+- `src/app/api/auth/get-profile/route.ts` reads profile data by user ID
+- `src/app/api/auth/update-profile/route.ts` updates the profile record
+- Protected pages are enforced by `middleware.ts` and client-side `useSessionGuard` for UX fallback
+
+## Playwright end-to-end tests
+
+This repository includes Playwright coverage in `tests/moodify.spec.ts`.
+
+Run tests locally with:
+
+```bash
+npm install
+npx playwright install
+npm run test:e2e
+```
+
+The Playwright config is in `playwright.config.ts`; it starts a local dev server on `http://127.0.0.1:3001` and runs against `chromium` and `mobile`.
+
+## Environment variables
+
+Set these before running the app or tests:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+YOUTUBE_API_KEY=
+```
+
+For stable Playwright authentication tests, optionally provide a reusable test account:
+
+```bash
+PLAYWRIGHT_TEST_EMAIL=you@example.com
+PLAYWRIGHT_TEST_PASSWORD=YourTestPassword123
+```
+
+When these are present, the Playwright suite will sign in with the configured account instead of creating a new user on every run.
+
+## Deployment
+
+The easiest way to deploy is Vercel. See the Next.js deployment docs for details.
+
+## Notes
+
+The app already includes auth middleware, protected routes, history and playlist persistence, and a responsive Tailwind UI with `framer-motion` animation support.

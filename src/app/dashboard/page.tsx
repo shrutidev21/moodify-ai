@@ -1,6 +1,15 @@
+"use client";
+
 import { DashboardClient } from "@/components/sections/dashboard-client";
+import { useSessionGuard } from "@/lib/hooks/useSessionGuard";
 
 export default function DashboardPage() {
+  const ready = useSessionGuard();
+
+  if (!ready) {
+    return <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"><p className="text-center text-zinc-400">Checking access…</p></div>;
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">

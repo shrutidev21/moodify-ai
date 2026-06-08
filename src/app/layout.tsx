@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import { AppProviders } from "@/providers/app-providers";
 import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Moodify AI",
@@ -26,11 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
         <AppProviders>
-          <AppShell>{children}</AppShell>
+          <Suspense fallback={children}>
+            <AppShell>{children}</AppShell>
+          </Suspense>
         </AppProviders>
       </body>
     </html>

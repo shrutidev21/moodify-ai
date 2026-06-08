@@ -1,0 +1,12 @@
+
+> moodify-ai@0.1.0 start
+> next start -p 3001
+
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3001
+   - Network:      http://10.47.80.211:3001
+
+ ✓ Starting...
+[Supabase] Checking DB connection on server start...
+ ✓ Ready in 1149ms
+[Supabase] DB connected. Table "profiles" is reachable.

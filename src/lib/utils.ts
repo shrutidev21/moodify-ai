@@ -19,3 +19,21 @@ export function formatIsoDuration(value?: string) {
 export function uid(prefix = "id") {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
+
+/**
+ * Safely extract error message from unknown error type
+ * Handles Error objects, strings, and arbitrary values
+ */
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error && typeof error === "object" && "message" in error) {
+    const msg = (error as Record<string, unknown>).message;
+    return typeof msg === "string" ? msg : String(error);
+  }
+  return String(error ?? "Unknown error");
+}

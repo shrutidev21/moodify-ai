@@ -52,8 +52,8 @@ export function DashboardClient() {
             {history.length ? (
               history.map((item) => (
                 <div key={item.id} className="rounded-md bg-white/[0.05] p-3">
-                  <p className="text-sm font-medium">{item.prompt}</p>
-                  <p className="text-xs text-zinc-500">{item.title}</p>
+                  <p className="text-sm font-medium">{item.user_input}</p>
+                  <p className="text-xs text-zinc-500">{item.primary_mood} • {item.secondary_mood}</p>
                 </div>
               ))
             ) : (

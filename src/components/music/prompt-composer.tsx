@@ -30,8 +30,17 @@ export function PromptComposer({ compact = false }: { compact?: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
-      const aiJson = (await aiResponse.json()) as { analysis: MoodAnalysis; error?: string };
+      const aiJson = (await aiResponse.json()) as {
+        analysis: MoodAnalysis;
+        cached?: boolean;
+        cacheSource?: string | null;
+        error?: string;
+      };
       if (!aiResponse.ok) throw new Error(aiJson.error);
+      console.log("[Moodify][Browser] ai/analyze:", {
+        cached: Boolean(aiJson.cached),
+        cacheSource: aiJson.cacheSource ?? null,
+      });
 
       const musicResponse = await fetch("/api/youtube/search", {
         method: "POST",
@@ -65,7 +74,46 @@ export function PromptComposer({ compact = false }: { compact?: boolean }) {
         createdAt: new Date().toISOString(),
       };
       dispatch(setCurrentPlaylist(playlist));
-      dispatch(addSearch({ id: playlist.id, prompt, title: playlist.title, createdAt: playlist.createdAt }));
+      const searchItem = { id: playlist.id, prompt, title: playlist.title, createdAt: playlist.createdAt };
+      dispatch(addSearch(searchItem));
+      try {
+        // persist optimistic history locally so it survives reloads when DB is absent
+        try {
+          const key = "moodify:local_history";
+          const raw = localStorage.getItem(key);
+          const arr = raw ? JSON.parse(raw) : [];
+          arr.unshift(searchItem);
+          const trimmed = arr.slice(0, 20);
+          localStorage.setItem(key, JSON.stringify(trimmed));
+        } catch {
+          // ignore storage errors
+        }
+        // attempt to attach authenticated user id when available
+        const sess = await (await import("@/features/auth/authService")).getSession();
+        const userId = sess?.user?.id ?? null;
+        const historyResponse = await fetch("/api/history/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: playlist.id, prompt: playlist.prompt, analysis: playlist.analysis, songs: playlist.songs, userId }),
+        });
+        const historyJson = (await historyResponse.json()) as {
+          saved?: boolean;
+          mode?: string;
+          id?: string;
+          error?: string;
+        };
+        console.log("[Moodify][Browser] history/save response:", {
+          ok: historyResponse.ok,
+          status: historyResponse.status,
+          ...historyJson,
+        });
+        if (!historyResponse.ok) {
+          console.warn("[Moodify][Browser] history/save failed:", historyJson.error);
+        }
+      } catch (e) {
+        // non-fatal: history persistence failure shouldn't block UX
+        console.warn("[Moodify][Browser] Failed to persist mood history", e);
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not generate playlist.");
     } finally {
